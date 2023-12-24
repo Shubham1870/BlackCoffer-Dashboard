@@ -12,7 +12,7 @@ import TopicsRadarChart from "./TopicChart";
 import PieChart from "./SectorChart";
 import CountryChart from "./Country";
 import LikelihoodRadarChart from "./LikelihoodChart";
-import Footer from "./Footer";
+import Footer from "./Footer"
 
 Chart.register(CategoryScale);
 

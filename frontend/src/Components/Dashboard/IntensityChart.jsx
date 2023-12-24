@@ -2,10 +2,10 @@ import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Heading } from '@chakra-ui/react';
+import _ from 'lodash';
 
 const IntensityChart = ({ data }) => {
   const intensityData = data.map(item => item.intensity);
-  const years = data.map(item => item.start_year);
 
   const getColor = (value) => {
     const colors = [
@@ -13,8 +13,8 @@ const IntensityChart = ({ data }) => {
       '#F2B93B', // Yellow
       '#FF8000', // Orange
       '#FF453A', // Red
-    
     ];
+
     const threshold = Math.max(...intensityData) / 4;
     if (value < threshold) {
       return colors[0];
@@ -27,15 +27,26 @@ const IntensityChart = ({ data }) => {
     }
   };
 
+  // Filtering data to remove entries without a year
+  const filteredData = data.filter(item => item.start_year);
+
+  // Aggregating data using lodash, extracting unique years, and sorting them
+  const uniqueYears = _.uniq(filteredData.map(item => item.start_year)).sort();
+  const aggregatedData = uniqueYears.map(year => {
+    const group = filteredData.filter(item => item.start_year === year);
+    const averageIntensity = group.reduce((sum, item) => sum + item.intensity, 0) / group.length;
+    return { startYear: year, intensity: Math.min(averageIntensity, 500) }; // Cap at 500%
+  });
+
   const chartData = {
-    labels: years,
+    labels: aggregatedData.map(item => item.startYear),
     datasets: [
       {
         label: 'Intensity',
-        backgroundColor: intensityData.map((value) => getColor(value)),
+        backgroundColor: aggregatedData.map(item => getColor(item.intensity)),
         borderColor: 'rgba(0,0,0,1)',
         borderWidth: 1,
-        data: intensityData,
+        data: aggregatedData.map(item => item.intensity),
       },
     ],
   };
@@ -64,7 +75,6 @@ const IntensityChart = ({ data }) => {
         display: false,
       },
       datalabels: {
-        
         anchor: 'end',
         align: 'start',
         offset: -20,
@@ -72,7 +82,7 @@ const IntensityChart = ({ data }) => {
           size: 14,
           weight: 'bold',
         },
-        formatter: (value) => value + '%',
+        formatter: (value) => Math.min(value, 500).toFixed(2) + '%', // Cap at 500%
         shadowBlur: 10,
         shadowColor: 'white',
       },
@@ -83,7 +93,6 @@ const IntensityChart = ({ data }) => {
           display: false,
         },
         ticks: {
-          
           font: {
             family: 'Roboto',
             size: 14,
@@ -96,26 +105,27 @@ const IntensityChart = ({ data }) => {
           display: false,
         },
         ticks: {
-          
           font: {
             family: 'Roboto',
             size: 14,
             weight: 'bold',
           },
-          callback: (value) => value + '%',
+          callback: (value) => Math.min(value, 500).toFixed(2) + '%', // Cap at 500%
         },
       },
     },
     animation: {
       duration: 4000,
-      easing: 'easeInOutQuart', // Use a smooth easing function
+      easing: 'easeInOutQuart',
       mode: 'progressive',
     },
   };
 
   return (
-    <div style={{ margin: '50px', padding:"10px", fontFamily: 'Arial, sans-serif',  borderRadius: '8px', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)' }}>
-      <Heading as="h2" mb={4}>Intensity Chart</Heading>
+    <div style={{ margin: '50px', padding: '10px', fontFamily: 'Arial, sans-serif', borderRadius: '8px', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)' }}>
+      <Heading as="h2" mb={4}>
+        Intensity Chart
+      </Heading>
       <Bar data={chartData} options={chartOptions} plugins={[ChartDataLabels]} />
     </div>
   );

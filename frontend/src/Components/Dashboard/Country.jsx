@@ -5,22 +5,17 @@ import {
   Flex,
   Heading,
   Select,
-  useColorMode,
-  useColorModeValue
+  useColorModeValue,
 } from "@chakra-ui/react";
 
 const CountryChart = ({ data }) => {
-  const { colorMode } = useColorMode();
-  const [selectedCountry, setSelectedCountry] = useState(
-    "United States of America"
-  );
+  const [selectedCountry, setSelectedCountry] = useState("United States of America");
   const [chartData, setChartData] = useState(null);
+  const chartBackgroundColor = useColorModeValue("rgba(79, 59, 169, 0.7)", "rgba(144, 104, 190, 0.7)");
 
   useEffect(() => {
-    const countryData = data.filter(
-      (entry) => entry.country === selectedCountry
-    );
-    console.log('Country Data:', countryData);
+    const countryData = data.filter(entry => entry.country === selectedCountry);
+
     const sectors = {};
     countryData.forEach((entry) => {
       if (!sectors[entry.sector]) {
@@ -30,14 +25,7 @@ const CountryChart = ({ data }) => {
     });
 
     const sectorLabels = Object.keys(sectors);
-    const sectorIntensities = sectorLabels.map(
-      (sector) => sectors[sector]
-    );
-
-    const chartBackgroundColor =
-      colorMode === "light"
-        ? "rgba(79, 59, 169, 0.7)"
-        : "rgba(144, 104, 190, 0.7)";
+    const sectorIntensities = sectorLabels.map((sector) => sectors[sector]);
 
     setChartData({
       labels: sectorLabels,
@@ -49,23 +37,28 @@ const CountryChart = ({ data }) => {
         },
       ],
     });
-  }, [selectedCountry, data, colorMode]);
+  }, [selectedCountry, data, chartBackgroundColor]);
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: {
-        stacked: true,
-      },
-      y: {
-        stacked: true,
-        grid: {
-          color: colorMode === "light" ? "gray.200" : "gray.900",
-        },
-      },
+       x: {
+        
+         stacked: true,
+       },
+       y: {
+         
+         stacked: true,
+         grid: {
+           color: "gray.200",
+         },
+         padding: { 
+           
+         },
+       },
     },
-  };
+   };
 
   const handleCountryChange = (event) => {
     setSelectedCountry(event.target.value);
@@ -74,7 +67,7 @@ const CountryChart = ({ data }) => {
   return (
     <Box p={6} shadow="md" bg={useColorModeValue("white", "gray.800")} m={50}>
       <Flex direction="column" margin={'auto'}>
-        <Heading as={"h2"} textAlign="left" mb={4} style={{ textAlign: "left" }} >
+        <Heading as="h2" mb={4}>
           Country Chart
         </Heading>
         <Select
@@ -84,16 +77,14 @@ const CountryChart = ({ data }) => {
           w="200px"
           colorScheme="purple"
         >
-          <option value="United States of America">
-            United States of America
-          </option>
+          <option value="United States of America">United States of America</option>
           <option value="Mexico">Mexico</option>
           <option value="Nigeria">Nigeria</option>
           <option value="Lebanon">Lebanon</option>
           <option value="Russia">Russia</option>
           <option value="Saudi Arabia">Saudi Arabia</option>
         </Select>
-        <Box height="500px" width={"100%"}>
+        <Box height="500px" width="100%">
           {chartData && <Bar data={chartData} options={chartOptions} />}
         </Box>
       </Flex>
